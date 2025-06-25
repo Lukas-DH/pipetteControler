@@ -40,8 +40,11 @@ def main():
     parser.add_argument('--true', action='store_true', help='Send TRUE signal')
     parser.add_argument('--false', action='store_true', help='Send FALSE signal')
     parser.add_argument('--address', type=int, default=2, help='Address (default: 2)')
-    parser.add_argument('--host', type=str, default='localhost', help='Host (default: localhost)')
-    parser.add_argument('--port', type=int, default=502, help='Port (default: 502)')
+    # Import config for defaults
+    from config import MODBUS_HOST, MODBUS_PORT
+    
+    parser.add_argument('--host', type=str, default=MODBUS_HOST, help=f'Host (default: {MODBUS_HOST})')
+    parser.add_argument('--port', type=int, default=MODBUS_PORT, help=f'Port (default: {MODBUS_PORT})')
     
     args = parser.parse_args()
     

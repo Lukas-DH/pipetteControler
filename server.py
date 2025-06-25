@@ -30,32 +30,36 @@ class PipetteWorkflowDataBlock(ModbusSparseDataBlock):
         self.workflow_state = "IDLE"  # IDLE, ACKNOWLEDGED, RUNNING, COMPLETED
         self.current_workflow = None
         
+        # Import config for workflow parameters
+        from config import (DEFAULT_ASPIRATE_VOLUME, DEFAULT_DISPENSE_VOLUME, DEFAULT_SPEED,
+                           ASPIRATE_ADDRESS, DISPENSE_ADDRESS, HOME_ADDRESS)
+        
         # Define workflow commands
         self.workflows = {
-            2: PipetteWorkflow(
+            ASPIRATE_ADDRESS: PipetteWorkflow(
                 name="Aspirate (Fill Pipette)",
-                address=2,
+                address=ASPIRATE_ADDRESS,
                 command="aspirate",
-                args=["--volume", "5000", "--speed", "5"]
+                args=["--volume", str(DEFAULT_ASPIRATE_VOLUME), "--speed", str(DEFAULT_SPEED)]
             ),
-            3: PipetteWorkflow(
+            DISPENSE_ADDRESS: PipetteWorkflow(
                 name="Dispense (Drop in Dish)",
-                address=3, 
+                address=DISPENSE_ADDRESS, 
                 command="dispense",
-                args=["--volume", "1250", "--speed", "5"]
+                args=["--volume", str(DEFAULT_DISPENSE_VOLUME), "--speed", str(DEFAULT_SPEED)]
             ),
-            4: PipetteWorkflow(
+            HOME_ADDRESS: PipetteWorkflow(
                 name="Home (Return to Rack)",
-                address=4,
+                address=HOME_ADDRESS,
                 command="home", 
-                args=["--speed", "5"]
+                args=["--speed", str(DEFAULT_SPEED)]
             )
         }
         
         # Set emojis for different workflows
-        self.workflows[2].emoji = "💧"  # Aspirate
-        self.workflows[3].emoji = "🥽"  # Dispense 
-        self.workflows[4].emoji = "🏠"  # Home
+        self.workflows[ASPIRATE_ADDRESS].emoji = "💧"  # Aspirate
+        self.workflows[DISPENSE_ADDRESS].emoji = "🥽"  # Dispense 
+        self.workflows[HOME_ADDRESS].emoji = "🏠"  # Home
         
     def setValues(self, address, values):
         print(f"Received at address {address}: {values}")
@@ -188,7 +192,8 @@ identity.ModelName = 'Pymodbus Server'
 identity.MajorMinorRevision = '1.0'
 
 # Start the Modbus server 
-print("Starting Modbus TCP server on port 502...")
+from config import MODBUS_PORT as config_port
+print(f"Starting Modbus TCP server on port {config_port}...")
 print("🔬 Pipette-Robot Workflow Integration:")
 print()
 print("AVAILABLE WORKFLOWS:")
@@ -210,8 +215,10 @@ print("   python simulator.py --true --address 3   # Home")
 print("   python status_reader.py --monitor        # Monitor state")
 print()
 
+from config import MODBUS_PORT
+
 try:
-    StartTcpServer(context, identity=identity, address=("0.0.0.0", 502))
+    StartTcpServer(context, identity=identity, address=("0.0.0.0", MODBUS_PORT))
 except KeyboardInterrupt:
     print("\n🛑 Server shutdown requested")
 except Exception as e:

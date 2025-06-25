@@ -215,8 +215,11 @@ Examples:
     )
     
     # Connection arguments
-    parser.add_argument('--port', type=str, default='/dev/tty.usbserial-FT3LK3ZO',
-                       help='Serial port (default: /dev/tty.usbserial-FT3LK3ZO)')
+    # Import config for default port
+    from config import PIPETTE_PORT
+    
+    parser.add_argument('--port', type=str, default=PIPETTE_PORT,
+                       help=f'Serial port (default: {PIPETTE_PORT})')
     
     # Information commands
     parser.add_argument('--info', action='store_true',

@@ -192,9 +192,11 @@ def main():
     print()
     
     # Get port name
-    port_name = input("Enter serial port (default: /dev/tty.usbserial-FT3LK3ZO): ").strip()
+    from config import PIPETTE_PORT
+    
+    port_name = input(f"Enter serial port (default: {PIPETTE_PORT}): ").strip()
     if not port_name:
-        port_name = "/dev/tty.usbserial-FT3LK3ZO"
+        port_name = PIPETTE_PORT
     
     # Create controller
     pipette = InteractivePipetteController(port_name)

@@ -325,8 +325,9 @@ class PipetteController:
 
 def main():
     """Main application"""
-    # Configure your serial port here
-    PORT_NAME = "/dev/tty.usbserial-FT3LK3ZO"  # Change this to your serial port (e.g., "/dev/ttyUSB0" on Linux)
+    from config import PIPETTE_PORT
+    
+    PORT_NAME = PIPETTE_PORT
     
     # Create controller instance
     controller = PipetteController(PORT_NAME)

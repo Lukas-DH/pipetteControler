@@ -73,8 +73,11 @@ def monitor_mode(host, port, start_address=0, count=10, interval=2):
 
 def main():
     parser = argparse.ArgumentParser(description='Read Modbus server status')
-    parser.add_argument('--host', type=str, default='localhost', help='Host (default: localhost)')
-    parser.add_argument('--port', type=int, default=502, help='Port (default: 502)')
+    # Import config for defaults
+    from config import MODBUS_HOST, MODBUS_PORT
+    
+    parser.add_argument('--host', type=str, default=MODBUS_HOST, help=f'Host (default: {MODBUS_HOST})')
+    parser.add_argument('--port', type=int, default=MODBUS_PORT, help=f'Port (default: {MODBUS_PORT})')
     parser.add_argument('--start', type=int, default=0, help='Start address (default: 0)')
     parser.add_argument('--count', type=int, default=10, help='Number of addresses to read (default: 10)')
     parser.add_argument('--monitor', action='store_true', help='Continuous monitoring mode')

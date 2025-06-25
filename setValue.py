@@ -6,8 +6,8 @@ def main():
     parser = argparse.ArgumentParser(description='Set coil value on Modbus server')
     parser.add_argument('--value', type=str, choices=['true', 'false'], required=True,
                         help='Value to set (true or false)')
-    parser.add_argument('--address', type=int, default=2,
-                        help='Coil address (default: 2)')
+    parser.add_argument('--address', type=int, default=1,
+                        help='Coil address (default: 1)')
     parser.add_argument('--host', type=str, default='localhost',
                         help='Server host (default: localhost)')
     parser.add_argument('--port', type=int, default=502,

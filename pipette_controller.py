@@ -337,51 +337,67 @@ def main():
             print("Failed to connect to pipette")
             return
         
-        # Get pipette info
-        print("\nGetting pipette information...")
+        # Get and display pipette info
+        print("\n=== Pipette Information ===")
         info = controller.get_info()
         if info:
-            print(f"Firmware: {info['firmware_version']}")
-            print(f"Hardware: {info['hardware_version']}")
-            print(f"Serial: {info['serial_number']}")
-            print(f"Model: {info['model_type']}")
+            print(f"Firmware Version: {info['firmware_version']}")
+            print(f"Hardware Version: {info['hardware_version']}")
+            print(f"Serial Number:    {info['serial_number']}")
+            print(f"Model Type:       {info['model_type']}")
+            
+            # Add model type description
+            model_descriptions = {
+                1: "12.5 μl MC",
+                2: "12.5 μl Voyager 8ch", 
+                3: "12.5 μl Voyager 12ch",
+                4: "12.5 μl VOYAGER 8ch",
+                5: "12.5 μl VOYAGER 12ch",
+                6: "50 μl SC",
+                7: "50 μl MC 8ch",
+                8: "50 μl MC 12ch",
+                9: "50 μl MC 16ch",
+                10: "50 μl VOYAGER 8ch",
+                11: "50 μl VOYAGER 12ch",
+                12: "125 μl SC",
+                13: "125 μl MC 8ch",
+                14: "125 μl MC 12ch",
+                15: "125 μl MC 16ch",
+                16: "125 μl VOYAGER 8ch",
+                17: "125 μl VOYAGER 12ch",
+                18: "300 μl SC",
+                19: "300 μl MC 8ch",
+                20: "300 μl MC 12ch",
+                21: "300 μl VOYAGER 4ch",
+                22: "300 μl VOYAGER 6ch",
+                23: "300 μl VOYAGER 8ch",
+                24: "1250 μl SC",
+                25: "1250 μl MC 8ch",
+                26: "1250 μl MC 12ch",
+                27: "1250 μl VOYAGER 4ch",
+                28: "1250 μl VOYAGER 6ch",
+                29: "1250 μl VOYAGER 8ch",
+                30: "5000 μl SC",
+                31: "STEP1100 (testing)"
+            }
+            model_desc = model_descriptions.get(info['model_type'], "Unknown model")
+            print(f"Model Description: {model_desc}")
+        else:
+            print("Failed to get pipette information")
         
-        # Check status before purging
-        print("\nChecking pipette status...")
+        # Check current status
+        print("\n=== Current Status ===")
         status = controller.get_action_status()
         if status:
             action_status, hw_error = status
             print(f"Action Status: {ActionStatus(action_status).name}")
             if hw_error != 0:
                 print(f"Hardware Error: {hw_error}")
-        
-        # Execute purge command
-        print("\nExecuting purge command...")
-        success = controller.purge(speed=7, message="Python Purge")
-        
-        if success:
-            print("Purge command sent successfully!")
-            
-            # Monitor status during purge
-            print("Monitoring purge status...")
-            for i in range(30):  # Monitor for up to 30 seconds
-                time.sleep(1)
-                status = controller.get_action_status()
-                if status:
-                    action_status, hw_error = status
-                    print(f"Status: {ActionStatus(action_status).name}")
-                    
-                    if action_status == ActionStatus.READY:
-                        print("Purge completed!")
-                        break
-                    elif action_status == ActionStatus.USER_ABORT:
-                        print("Purge was aborted by user")
-                        break
-                else:
-                    print("Failed to get status")
-                    break
         else:
-            print("Failed to execute purge command")
+            print("Failed to get status")
+        
+        print("\nPipette controller demo completed.")
+        print("Use integrate_pipette.py for command-line control or pipette_interactive.py for interactive mode.")
     
     except KeyboardInterrupt:
         print("\nOperation cancelled by user")

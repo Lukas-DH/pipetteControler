@@ -7,7 +7,7 @@ Edit these values for your specific setup
 # Serial port configuration
 # Common ports:
 #   macOS: "/dev/tty.usbserial-FT3LK3ZO" 
-#   Linux: "/dev/ttyUSB0"
+#   Linux(jetsonNano): "/dev/ttyUSB0" 
 #   Windows: "COM3"
 PIPETTE_PORT = "/dev/tty.usbserial-FT3LK3ZO"
 

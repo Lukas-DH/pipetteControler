@@ -29,6 +29,7 @@ class PipetteWorkflowDataBlock(ModbusSparseDataBlock):
         self.pipette_busy = False
         self.workflow_state = "IDLE"  # IDLE, ACKNOWLEDGED, RUNNING, COMPLETED
         self.current_workflow = None
+        self.last_values = {}  # Track last values to detect changes
         
         # Import config for workflow parameters
         from config import (DEFAULT_ASPIRATE_VOLUME, DEFAULT_DISPENSE_VOLUME, DEFAULT_SPEED,
@@ -62,15 +63,23 @@ class PipetteWorkflowDataBlock(ModbusSparseDataBlock):
         self.workflows[HOME_ADDRESS].emoji = "🏠"  # Home
         
     def setValues(self, address, values):
-        print(f"Received at address {address}: {values}")
+        # Check if value actually changed
+        current_value = values[0] if values else False
+        last_value = self.last_values.get(address, None)
         
-        # Handle workflow command addresses (2, 3, 4, etc.)
-        if address in self.workflows and values:
-            workflow = self.workflows[address]
-            if values[0] == True:
-                self.handle_robot_request(workflow)
-            elif values[0] == False:
-                self.handle_robot_acknowledge_completion(workflow)
+        if last_value != current_value:
+            # Value changed - print and process
+            print(f"📡 Address {address} changed: {last_value} → {current_value}")
+            self.last_values[address] = current_value
+            
+            # Handle workflow command addresses (2, 3, 4, etc.)
+            if address in self.workflows and values:
+                workflow = self.workflows[address]
+                if values[0] == True:
+                    self.handle_robot_request(workflow)
+                elif values[0] == False:
+                    self.handle_robot_acknowledge_completion(workflow)
+        # else: Value unchanged - ignore silently
         
         super().setValues(address, values)
     

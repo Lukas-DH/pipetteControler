@@ -1,0 +1,19 @@
+[Unit]
+Description=Pipette Modbus Server
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/pipetteControler
+Environment=PATH=/home/pi/pipetteControler/venv/bin
+ExecStart=/home/pi/pipetteControler/venv/bin/python server.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

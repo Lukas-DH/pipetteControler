@@ -13,11 +13,12 @@ log.setLevel(logging.WARNING)
 
 class PipetteWorkflow:
     """Base class for pipette workflow commands"""
-    def __init__(self, name, address, command, args):
+    def __init__(self, name, address, command, args, port=None):
         self.name = name
         self.address = address  # Command address (2, 3, 4, etc.)
         self.command = command  # Pipette command
         self.args = args       # Command arguments
+        self.port = port       # Serial port for this pipette
         self.emoji = "🔬"       # Default emoji
     
     def get_description(self):
@@ -33,34 +34,65 @@ class PipetteWorkflowDataBlock(ModbusSparseDataBlock):
         
         # Import config for workflow parameters
         from config import (DEFAULT_ASPIRATE_VOLUME, DEFAULT_DISPENSE_VOLUME, DEFAULT_SPEED,
-                           ASPIRATE_ADDRESS, DISPENSE_ADDRESS, HOME_ADDRESS)
+                           ASPIRATE_ADDRESS, DISPENSE_ADDRESS, HOME_ADDRESS, PIPETTE_PORT,
+                           DEFAULT_ASPIRATE_VOLUME_2, DEFAULT_DISPENSE_VOLUME_2, DEFAULT_SPEED_2,
+                           ASPIRATE_ADDRESS_2, DISPENSE_ADDRESS_2, HOME_ADDRESS_2, PIPETTE_PORT_2)
         
-        # Define workflow commands
+        # Define workflow commands for both pipettes
         self.workflows = {
+            # Pipette 1 workflows
             ASPIRATE_ADDRESS: PipetteWorkflow(
-                name="Aspirate (Fill Pipette)",
+                name="Pipette 1: Aspirate (Fill Pipette)",
                 address=ASPIRATE_ADDRESS,
                 command="aspirate",
-                args=["--volume", str(DEFAULT_ASPIRATE_VOLUME), "--speed", str(DEFAULT_SPEED)]
+                args=["--volume", str(DEFAULT_ASPIRATE_VOLUME), "--speed", str(DEFAULT_SPEED)],
+                port=PIPETTE_PORT
             ),
             DISPENSE_ADDRESS: PipetteWorkflow(
-                name="Dispense (Drop in Dish)",
-                address=DISPENSE_ADDRESS, 
+                name="Pipette 1: Dispense (Drop in Dish)",
+                address=DISPENSE_ADDRESS,
                 command="dispense",
-                args=["--volume", str(DEFAULT_DISPENSE_VOLUME), "--speed", str(DEFAULT_SPEED)]
+                args=["--volume", str(DEFAULT_DISPENSE_VOLUME), "--speed", str(DEFAULT_SPEED)],
+                port=PIPETTE_PORT
             ),
             HOME_ADDRESS: PipetteWorkflow(
-                name="Home (Return to Rack)",
+                name="Pipette 1: Home (Return to Rack)",
                 address=HOME_ADDRESS,
-                command="home", 
-                args=["--speed", str(DEFAULT_SPEED)]
+                command="home",
+                args=["--speed", str(DEFAULT_SPEED)],
+                port=PIPETTE_PORT
+            ),
+            # Pipette 2 workflows
+            ASPIRATE_ADDRESS_2: PipetteWorkflow(
+                name="Pipette 2: Aspirate (Fill Pipette)",
+                address=ASPIRATE_ADDRESS_2,
+                command="aspirate",
+                args=["--volume", str(DEFAULT_ASPIRATE_VOLUME_2), "--speed", str(DEFAULT_SPEED_2)],
+                port=PIPETTE_PORT_2
+            ),
+            DISPENSE_ADDRESS_2: PipetteWorkflow(
+                name="Pipette 2: Dispense (Drop in Dish)",
+                address=DISPENSE_ADDRESS_2,
+                command="dispense",
+                args=["--volume", str(DEFAULT_DISPENSE_VOLUME_2), "--speed", str(DEFAULT_SPEED_2)],
+                port=PIPETTE_PORT_2
+            ),
+            HOME_ADDRESS_2: PipetteWorkflow(
+                name="Pipette 2: Home (Return to Rack)",
+                address=HOME_ADDRESS_2,
+                command="home",
+                args=["--speed", str(DEFAULT_SPEED_2)],
+                port=PIPETTE_PORT_2
             )
         }
         
         # Set emojis for different workflows
-        self.workflows[ASPIRATE_ADDRESS].emoji = "💧"  # Aspirate
-        self.workflows[DISPENSE_ADDRESS].emoji = "🥽"  # Dispense 
-        self.workflows[HOME_ADDRESS].emoji = "🏠"  # Home
+        self.workflows[ASPIRATE_ADDRESS].emoji = "💧"  # Pipette 1 Aspirate
+        self.workflows[DISPENSE_ADDRESS].emoji = "🥽"  # Pipette 1 Dispense
+        self.workflows[HOME_ADDRESS].emoji = "🏠"  # Pipette 1 Home
+        self.workflows[ASPIRATE_ADDRESS_2].emoji = "🔵"  # Pipette 2 Aspirate
+        self.workflows[DISPENSE_ADDRESS_2].emoji = "🔶"  # Pipette 2 Dispense
+        self.workflows[HOME_ADDRESS_2].emoji = "🏡"  # Pipette 2 Home
         
     def setValues(self, address, values):
         # Check if value actually changed
@@ -128,8 +160,8 @@ class PipetteWorkflowDataBlock(ModbusSparseDataBlock):
                 self.workflow_state = "RUNNING"
                 print(f"🚀 Executing {workflow.name}...")
                 
-                # Build command arguments
-                cmd_args = ['python', 'integrate_pipette.py', workflow.command] + workflow.args
+                # Build command arguments with port specification
+                cmd_args = ['python', 'integrate_pipette.py', workflow.command] + workflow.args + ['--port', workflow.port]
                 print(f"Command: {' '.join(cmd_args)}")
                 
                 # Run the integrate_pipette.py script
